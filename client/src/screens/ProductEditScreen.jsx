@@ -1,12 +1,11 @@
-import React from 'react'
-import {useState, useEffect} from 'react';
-import {Link, useNavigate, useParams} from 'react-router-dom';
-import {Form , Button} from 'react-bootstrap';
-import Message from '../components/Message';
-import Loader from '../components/Loader';
-import FormContainer from '../components/FormContainer';
+import React, { useEffect, useState } from 'react';
+import { Button, Form } from 'react-bootstrap';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useGetProductDetailsQuery, useUpdateProductMutation } from '../slices/productApiSlice';
+import FormContainer from '../components/FormContainer';
+import Loader from '../components/Loader';
+import Message from '../components/Message';
+import { useGetProductDetailsQuery, useUpdateProductMutation, useUploadProductImageMutation } from '../slices/productApiSlice';
 
 
 const ProductEditScreen = () => {
@@ -21,7 +20,7 @@ const ProductEditScreen = () => {
     const [description , setDescription] = useState('');
     const [updateProduct, {isLoading:loadingUpdate}] = useUpdateProductMutation();
     const {data: product, isLoading, refetch, error} = useGetProductDetailsQuery(productId);
-
+    const [uploadProductImage, {isLoading: loadingUpload}] = useUploadProductImageMutation();
     const navigate = useNavigate();
 
     const submitHandler = async (e) => {
@@ -33,6 +32,19 @@ const ProductEditScreen = () => {
         navigate('/admin/productlist');
       }catch(err){
         toast.error(err?.data?.message || err.error)
+      }
+    }
+
+    const uploadFileHandler = async (e) => {
+      const formData = new FormData();
+      formData.append('image', e.target.files[0]);
+      try {
+        const res = await uploadProductImage(formData).unwrap();
+        console.log(res);
+        toast.success(res.message);
+        setImage(res.image);
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
       }
     }
 
@@ -70,6 +82,12 @@ const ProductEditScreen = () => {
                 <Form.Label>Price</Form.Label>
                 <Form.Control type='price' placeholder='Enter price' value={price} onChange={(e) => setPrice(e.target.value)}>
                 </Form.Control>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Image</Form.Label>
+                  <Form.Control type='text' placeholder='Enter Image URL' value={image} onChange={(e) => setImage(e.target.value)}></Form.Control>
+                  <Form.Control type='file' onChange={uploadFileHandler} label='Choose File'></Form.Control>
+                  {loadingUpdate && <Loader />}
                 </Form.Group>
                 <Form.Group controlId='brand'  className='my-2'>
                 <Form.Label>Brand</Form.Label>

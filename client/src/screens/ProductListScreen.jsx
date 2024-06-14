@@ -5,15 +5,25 @@ import { LinkContainer } from 'react-router-bootstrap'
 import { toast } from 'react-toastify'
 import Loader from '../components/Loader'
 import Message from '../components/Message'
-import { useCreateProductMutation, useGetProductsQuery } from '../slices/productApiSlice'
+import { useCreateProductMutation, useDeleteProductMutation, useGetProductsQuery } from '../slices/productApiSlice'
 
 const ProductListScreen = () => {
 const {data: products , isLoading, error, refetch} = useGetProductsQuery();
 const [createProduct , {isLoading: loadingCreate}] = useCreateProductMutation();
 console.log(products)
+const [deleteProduct, {isLoading: loadingDelete}] = useDeleteProductMutation();
 
-const deleteHandler = () => {
-    
+
+const deleteHandler = async (id) => {
+    if(window.confirm('Are you sure')){
+        try {
+            await deleteProduct(id);
+            refetch();
+            toast.success("Product deleted!")
+        } catch (err) {
+            toast.error(err?.data?.message || err.error);
+        }
+    }
 }
 
 const createProductHandler = async () => {
@@ -40,6 +50,7 @@ return (
         </Col>
         </Row> 
         {loadingCreate && <Loader />}
+        {loadingDelete && <Loader />}
         {isLoading ? (
             <Loader/>
         ): error ? (

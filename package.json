@@ -17,6 +17,7 @@
   "author": "Abhitachi",
   "license": "ISC",
   "dependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@paypal/react-paypal-js": "^8.3.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
@@ -27,6 +28,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.0",
+    "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.2"
   }
 }
