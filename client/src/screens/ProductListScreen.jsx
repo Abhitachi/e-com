@@ -2,16 +2,20 @@ import React from 'react'
 import { Button, Col, Row, Table } from 'react-bootstrap'
 import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
 import { LinkContainer } from 'react-router-bootstrap'
+import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Loader from '../components/Loader'
 import Message from '../components/Message'
+import Paginate from '../components/Paginate'
 import { useCreateProductMutation, useDeleteProductMutation, useGetProductsQuery } from '../slices/productApiSlice'
 
 const ProductListScreen = () => {
-const {data: products , isLoading, error, refetch} = useGetProductsQuery();
+    const {pageNumber, keyword} = useParams();
+    // console.log(pageNumber)
+const {data , isLoading, error, refetch} = useGetProductsQuery({keyword , pageNumber});
 const [createProduct , {isLoading: loadingCreate}] = useCreateProductMutation();
-console.log(products)
 const [deleteProduct, {isLoading: loadingDelete}] = useDeleteProductMutation();
+
 
 
 const deleteHandler = async (id) => {
@@ -70,7 +74,7 @@ return (
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map ((product) => (
+                        {data.products.map ((product) => (
                             <tr key={product._id}>
                                 <td>{product.name}</td>
                                 <td>{product.price}</td>
@@ -91,6 +95,7 @@ return (
                     </tbody>
                 </Table>
                 {/**Paginated placeholder */}
+                <Paginate pages={data.pages} page={data.page} isAdmin={true} />
             </>
         )}
     </>

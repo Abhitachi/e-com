@@ -2,14 +2,24 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import Product from "../models/product.model.js";
 
 const getProducts = asyncHandler(async (req, res) => {
-  const pageSize = 2;
+  const pageSize = 8;
+  // console.log(req.query.pageNumber, "pageNumber");
   const page = Number(req.query.pageNumber) || 1;
-  
-  const count = await Product.countDocuments(); //returns no of documents in db
-  const products = await Product.find({})
-  .limit(pageSize)
-  .skip(pageSize * (page - 1));
-  res.json({products, page, pages:Math.ceil(count/pageSize)});
+  // console.log(page);
+  const keyword = req.query.keyword
+    ? {
+        name: {
+          $regex: req.query.keyword,
+          $options: "i", //specifies case insensitivity for regex
+        },
+      }
+    : {};
+
+  const count = await Product.countDocuments({ ...keyword }); //returns no of documents in db
+  const products = await Product.find({ ...keyword })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+  res.json({ products, page, pages: Math.ceil(count / pageSize) });
 });
 
 const getProductById = asyncHandler(async (req, res) => {
@@ -73,7 +83,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
 const createProductReview = asyncHandler(async (req, res) => {
   const { rating, comment } = req.body;
-  console.log("CHecking bug", rating, comment);
+  // console.log("CHecking bug", rating, comment);
   const product = await Product.findById(req.params.id);
   console.log(product);
   if (product) {
@@ -81,7 +91,7 @@ const createProductReview = asyncHandler(async (req, res) => {
     const alreadyReviewed = product.reviews.find(
       (r) => r?.user?.toString() === req.user._id.toString()
     );
-    console.log(req.user._id, req.user.name);
+    // console.log(req.user._id, req.user.name);
 
     if (alreadyReviewed) {
       res.status(400);
@@ -95,7 +105,7 @@ const createProductReview = asyncHandler(async (req, res) => {
       user: req.user._id,
     };
 
-    console.log(review, "review");
+    // console.log(review, "review");
     product.reviews.push(review);
 
     product.numReviews = product.reviews.length;
@@ -103,15 +113,21 @@ const createProductReview = asyncHandler(async (req, res) => {
     product.rating =
       product.reviews.reduce((acc, item) => item.rating + acc, 0) /
       product.reviews.length;
-    console.log(product.rating, "rating");
-    console.log(product.reviews, "rating");
+    // console.log(product.rating, "rating");
+    // console.log(product.reviews, "rating");
     await product.save();
-    console.log("done saving");
+    // console.log("done saving");
     res.status(201).json({ message: "Review added" });
   } else {
     res.status(404);
     throw new Error("Product not found");
   }
+});
+
+const getTopProducts = asyncHandler(async (req, res) => {
+  const products = await Product.find({}).sort({ rating: -1 }).limit(5);
+  // console.log(products);
+  res.json(products);
 });
 
 export {
@@ -120,5 +136,6 @@ export {
   deleteProduct,
   getProductById,
   getProducts,
+  getTopProducts,
   updateProduct,
 };

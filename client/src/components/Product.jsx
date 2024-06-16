@@ -9,9 +9,9 @@ const Product = ({product}) => {
             </Link>
 
             <Card.Body>
-                <Link to={`/product/${product._id}`}>
-                    <Card.Title as='div' className='product-title'>
-                        <strong>{product.name}</strong>
+                <Link to={`/product/${product._id}` }>
+                    <Card.Title as='div' className='product-title' >
+                        <strong style={{color:'black'}}>{product.name}</strong>
                     </Card.Title>
                 </Link>
 
